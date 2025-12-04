@@ -15,9 +15,8 @@ import {
 import type { ModelCatalog } from "tokenlens/core";
 import { fetchModels } from "tokenlens/fetch";
 import { getUsage } from "tokenlens/helpers";
-import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
-import { entitlementsByUserType } from "@/lib/ai/entitlements";
+import { entitlements } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
@@ -25,6 +24,7 @@ import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
+import { auth } from "@/lib/auth";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -107,20 +107,20 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
 
     if (!session?.user) {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
-
-    const userType: UserType = session.user.type;
 
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
       differenceInHours: 24,
     });
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+    if (messageCount > entitlements.maxMessagesPerDay) {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
@@ -316,7 +316,9 @@ export async function DELETE(request: Request) {
     return new ChatSDKError("bad_request:api").toResponse();
   }
 
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
 
   if (!session?.user) {
     return new ChatSDKError("unauthorized:chat").toResponse();

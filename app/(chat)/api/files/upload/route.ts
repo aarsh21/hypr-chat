@@ -3,7 +3,7 @@ import path from "path";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { auth } from "@/app/(auth)/auth";
+import { auth } from "@/lib/auth";
 
 // Use Blob instead of File since File is not available in Node.js environment
 const FileSchema = z.object({
@@ -19,7 +19,9 @@ const FileSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,4 +1,4 @@
-import { auth } from "@/app/(auth)/auth";
+import { auth } from "@/lib/auth";
 import { getSuggestionsByDocumentId } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 
@@ -13,7 +13,9 @@ export async function GET(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
 
   if (!session?.user) {
     return new ChatSDKError("unauthorized:suggestions").toResponse();
