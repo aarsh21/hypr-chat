@@ -21,7 +21,7 @@ export function DataStreamHandler() {
     for (const delta of newDeltas) {
       const artifactDefinition = artifactDefinitions.find(
         (currentArtifactDefinition) =>
-          currentArtifactDefinition.kind === artifact.kind
+          currentArtifactDefinition.kind === artifact.kind,
       );
 
       if (artifactDefinition?.onStreamPart) {
