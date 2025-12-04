@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
+import { auth } from "./lib/auth";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,24 +16,27 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
-  });
+  // Allow access to login and register pages without auth
+  if (["/login", "/register"].includes(pathname)) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
 
-  if (!token) {
-    const redirectUrl = encodeURIComponent(request.url);
+    // Redirect authenticated users away from auth pages
+    if (session) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
 
-    return NextResponse.redirect(
-      new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url)
-    );
+    return NextResponse.next();
   }
 
-  const isGuest = guestRegex.test(token?.email ?? "");
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
 
-  if (token && !isGuest && ["/login", "/register"].includes(pathname)) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if (!session) {
+    // Redirect to login page for unauthenticated users
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
