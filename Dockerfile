@@ -1,27 +1,20 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-alpine AS base
+FROM oven/bun:1-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
-
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json bun.lock ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
-
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -30,11 +23,11 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build Next.js only (skip migration - will run at container startup)
-RUN pnpm exec next build
+# Build Next.js using bun
+RUN bun run --bun next build
 
 # Production image, copy all the files and run next
-FROM base AS runner
+FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -42,9 +35,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-# Install pnpm for running migrations
-RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 COPY --from=builder /app/public ./public
 
@@ -74,4 +64,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["node", "server.js"]
+CMD ["bun", "run", "server.js"]

@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "6543:3000"
     environment:
       - AUTH_SECRET=${AUTH_SECRET}
       - ZHIPU_API_KEY=${ZHIPU_API_KEY}
