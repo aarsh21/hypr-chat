@@ -1,10 +1,8 @@
 "use server";
 
 import { z } from "zod";
-
-import { createUser, getUser } from "@/lib/db/queries";
-
-import { signIn } from "./auth";
+import { auth } from "@/lib/auth";
+import { getUser } from "@/lib/db/queries";
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -25,11 +23,17 @@ export const login = async (
       password: formData.get("password"),
     });
 
-    await signIn("credentials", {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
+    // nextCookies plugin handles cookie setting automatically
+    const result = await auth.api.signInEmail({
+      body: {
+        email: validatedData.email,
+        password: validatedData.password,
+      },
     });
+
+    if (!result) {
+      return { status: "failed" };
+    }
 
     return { status: "success" };
   } catch (error) {
@@ -61,20 +65,28 @@ export const register = async (
       password: formData.get("password"),
     });
 
-    const [user] = await getUser(validatedData.email);
+    const [existingUser] = await getUser(validatedData.email);
 
-    if (user) {
+    if (existingUser) {
       return { status: "user_exists" } as RegisterActionState;
     }
-    await createUser(validatedData.email, validatedData.password);
-    await signIn("credentials", {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
+
+    // nextCookies plugin handles cookie setting automatically
+    const result = await auth.api.signUpEmail({
+      body: {
+        email: validatedData.email,
+        password: validatedData.password,
+        name: validatedData.email, // Better Auth requires a name
+      },
     });
+
+    if (!result) {
+      return { status: "failed" };
+    }
 
     return { status: "success" };
   } catch (error) {
+    console.error("Registration error:", error);
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
