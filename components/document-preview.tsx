@@ -20,7 +20,6 @@ import { InlineDocumentSkeleton } from "./document-skeleton";
 import { FileIcon, FullscreenIcon, ImageIcon, LoaderIcon } from "./icons";
 import { ImageEditor } from "./image-editor";
 import { SpreadsheetEditor } from "./sheet-editor";
-import { Editor } from "./text-editor";
 
 type DocumentPreviewProps = {
   isReadonly: boolean;
@@ -151,7 +150,7 @@ const PureHitboxLayer = ({
   hitboxRef: React.RefObject<HTMLDivElement>;
   result: any;
   setArtifact: (
-    updaterFn: UIArtifact | ((currentArtifact: UIArtifact) => UIArtifact)
+    updaterFn: UIArtifact | ((currentArtifact: UIArtifact) => UIArtifact),
   ) => void;
 }) => {
   const handleClick = useCallback(
@@ -173,10 +172,10 @@ const PureHitboxLayer = ({
                 width: boundingBox.width,
                 height: boundingBox.height,
               },
-            }
+            },
       );
     },
-    [setArtifact, result]
+    [setArtifact, result],
   );
 
   return (
@@ -248,9 +247,8 @@ const DocumentContent = ({ document }: { document: Document }) => {
   const containerClassName = cn(
     "h-[257px] overflow-y-scroll rounded-b-2xl border border-t-0 dark:border-zinc-700 dark:bg-muted",
     {
-      "p-4 sm:px-14 sm:py-16": document.kind === "text",
       "p-0": document.kind === "code",
-    }
+    },
   );
 
   const commonProps = {
@@ -266,9 +264,7 @@ const DocumentContent = ({ document }: { document: Document }) => {
 
   return (
     <div className={containerClassName}>
-      {document.kind === "text" ? (
-        <Editor {...commonProps} onSaveContent={handleSaveContent} />
-      ) : document.kind === "code" ? (
+      {document.kind === "code" ? (
         <div className="relative flex w-full flex-1">
           <div className="absolute inset-0">
             <CodeEditor {...commonProps} onSaveContent={handleSaveContent} />
