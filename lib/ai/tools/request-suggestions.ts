@@ -40,7 +40,7 @@ export const requestSuggestions = ({
       const { elementStream } = streamObject({
         model: myProvider.languageModel("artifact-model"),
         system:
-          "You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.",
+          'You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.\n\nYou MUST respond with a valid JSON array of objects, each with "originalSentence", "suggestedSentence", and "description" fields.',
         prompt: document.content,
         output: "array",
         schema: z.object({
@@ -48,6 +48,11 @@ export const requestSuggestions = ({
           suggestedSentence: z.string().describe("The suggested sentence"),
           description: z.string().describe("The description of the suggestion"),
         }),
+        providerOptions: {
+          openaiCompatible: {
+            structuredOutputs: false,
+          },
+        },
       });
 
       for await (const element of elementStream) {

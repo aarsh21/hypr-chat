@@ -11,11 +11,18 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
 
     const { fullStream } = streamObject({
       model: myProvider.languageModel("artifact-model"),
-      system: sheetPrompt,
+      system:
+        sheetPrompt +
+        '\n\nYou MUST respond with a valid JSON object in this exact format: {"csv": "your csv data here"}',
       prompt: title,
       schema: z.object({
         csv: z.string().describe("CSV data"),
       }),
+      providerOptions: {
+        openaiCompatible: {
+          structuredOutputs: false,
+        },
+      },
     });
 
     for await (const delta of fullStream) {
@@ -50,11 +57,18 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
 
     const { fullStream } = streamObject({
       model: myProvider.languageModel("artifact-model"),
-      system: updateDocumentPrompt(document.content, "sheet"),
+      system:
+        updateDocumentPrompt(document.content, "sheet") +
+        '\n\nYou MUST respond with a valid JSON object in this exact format: {"csv": "your csv data here"}',
       prompt: description,
       schema: z.object({
         csv: z.string(),
       }),
+      providerOptions: {
+        openaiCompatible: {
+          structuredOutputs: false,
+        },
+      },
     });
 
     for await (const delta of fullStream) {

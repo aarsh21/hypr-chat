@@ -2,7 +2,7 @@
 
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { motion } from "framer-motion";
-import { memo } from "react";
+import { memo, useRef } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { Suggestion } from "./elements/suggestion";
 import type { VisibilityType } from "./visibility-selector";
@@ -14,10 +14,10 @@ type SuggestedActionsProps = {
 };
 
 function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
+  const hasSentRef = useRef(false);
+
   const suggestedActions = [
-    "What are the advantages of using Next.js?",
     "Write code to demonstrate Dijkstra's algorithm",
-    "Help me write an essay about Silicon Valley",
     "What is the weather in San Francisco?",
   ];
 
@@ -37,6 +37,11 @@ function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
           <Suggestion
             className="h-auto w-full whitespace-normal p-3 text-left"
             onClick={(suggestion) => {
+              if (hasSentRef.current) {
+                return;
+              }
+              hasSentRef.current = true;
+
               window.history.pushState({}, "", `/chat/${chatId}`);
               sendMessage({
                 role: "user",

@@ -11,11 +11,18 @@ export const codeDocumentHandler = createDocumentHandler<"code">({
 
     const { fullStream } = streamObject({
       model: myProvider.languageModel("artifact-model"),
-      system: codePrompt,
+      system:
+        codePrompt +
+        '\n\nYou MUST respond with a valid JSON object in this exact format: {"code": "your code here"}',
       prompt: title,
       schema: z.object({
         code: z.string(),
       }),
+      providerOptions: {
+        openaiCompatible: {
+          structuredOutputs: false,
+        },
+      },
     });
 
     for await (const delta of fullStream) {
@@ -44,11 +51,18 @@ export const codeDocumentHandler = createDocumentHandler<"code">({
 
     const { fullStream } = streamObject({
       model: myProvider.languageModel("artifact-model"),
-      system: updateDocumentPrompt(document.content, "code"),
+      system:
+        updateDocumentPrompt(document.content, "code") +
+        '\n\nYou MUST respond with a valid JSON object in this exact format: {"code": "your code here"}',
       prompt: description,
       schema: z.object({
         code: z.string(),
       }),
+      providerOptions: {
+        openaiCompatible: {
+          structuredOutputs: false,
+        },
+      },
     });
 
     for await (const delta of fullStream) {
