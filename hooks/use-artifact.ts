@@ -7,7 +7,7 @@ import type { UIArtifact } from "@/components/artifact";
 export const initialArtifactData: UIArtifact = {
   documentId: "init",
   content: "",
-  kind: "text",
+  kind: "code",
   title: "",
   status: "idle",
   isVisible: false,
@@ -42,7 +42,7 @@ export function useArtifact() {
     null,
     {
       fallbackData: initialArtifactData,
-    }
+    },
   );
 
   const artifact = useMemo(() => {
@@ -64,7 +64,7 @@ export function useArtifact() {
         return updaterFn;
       });
     },
-    [setLocalArtifact]
+    [setLocalArtifact],
   );
 
   const { data: localArtifactMetadata, mutate: setLocalArtifactMetadata } =
@@ -74,7 +74,7 @@ export function useArtifact() {
       null,
       {
         fallbackData: null,
-      }
+      },
     );
 
   return useMemo(
@@ -84,6 +84,6 @@ export function useArtifact() {
       metadata: localArtifactMetadata,
       setMetadata: setLocalArtifactMetadata,
     }),
-    [artifact, setArtifact, localArtifactMetadata, setLocalArtifactMetadata]
+    [artifact, setArtifact, localArtifactMetadata, setLocalArtifactMetadata],
   );
 }
