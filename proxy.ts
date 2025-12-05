@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "./lib/auth";
+import { isRegistrationEnabled } from "./lib/constants";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,6 +15,11 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
+  }
+
+  // Redirect to login if registration is disabled
+  if (pathname === "/register" && !isRegistrationEnabled) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // Allow access to login and register pages without auth

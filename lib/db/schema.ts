@@ -134,7 +134,7 @@ export const voteDeprecated = pgTable(
     return {
       pk: primaryKey({ columns: [table.chatId, table.messageId] }),
     };
-  },
+  }
 );
 
 export type VoteDeprecated = InferSelectModel<typeof voteDeprecated>;
@@ -154,7 +154,7 @@ export const vote = pgTable(
     return {
       pk: primaryKey({ columns: [table.chatId, table.messageId] }),
     };
-  },
+  }
 );
 
 export type Vote = InferSelectModel<typeof vote>;
@@ -166,7 +166,7 @@ export const document = pgTable(
     createdAt: timestamp("createdAt").notNull(),
     title: text("title").notNull(),
     content: text("content"),
-    kind: varchar("text", { enum: ["code", "image", "sheet"] })
+    kind: varchar("text", { enum: ["code"] })
       .notNull()
       .default("code"),
     userId: text("userId")
@@ -177,7 +177,7 @@ export const document = pgTable(
     return {
       pk: primaryKey({ columns: [table.id, table.createdAt] }),
     };
-  },
+  }
 );
 
 export type Document = InferSelectModel<typeof document>;
@@ -203,7 +203,7 @@ export const suggestion = pgTable(
       columns: [table.documentId, table.documentCreatedAt],
       foreignColumns: [document.id, document.createdAt],
     }),
-  }),
+  })
 );
 
 export type Suggestion = InferSelectModel<typeof suggestion>;
@@ -221,7 +221,7 @@ export const stream = pgTable(
       columns: [table.chatId],
       foreignColumns: [chat.id],
     }),
-  }),
+  })
 );
 
 export type Stream = InferSelectModel<typeof stream>;

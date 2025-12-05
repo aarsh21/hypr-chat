@@ -49,7 +49,7 @@ export const myProvider = isTestEnvironment
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
         "title-model": glm.chatModel("glm-4.5-air"),
-        "artifact-model": glm.chatModel("glm-4.6"),
+        "artifact-model": google("gemini-2.0-flash"),
         // Gemini models
         "chat-model-gemini": google("gemini-2.0-flash"),
         "chat-model-gemini-reasoning": wrapLanguageModel({

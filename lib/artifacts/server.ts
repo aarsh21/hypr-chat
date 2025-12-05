@@ -1,7 +1,6 @@
 import type { UIMessageStreamWriter } from "ai";
 import type { Session } from "@/lib/auth";
 import { codeDocumentHandler } from "@/artifacts/code/server";
-import { sheetDocumentHandler } from "@/artifacts/sheet/server";
 import type { ArtifactKind } from "@/components/artifact";
 import { saveDocument } from "../db/queries";
 import type { Document } from "../db/schema";
@@ -90,7 +89,6 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
  */
 export const documentHandlersByArtifactKind: DocumentHandler[] = [
   codeDocumentHandler,
-  sheetDocumentHandler,
 ];
 
-export const artifactKinds = ["code", "sheet", "image"] as const;
+export const artifactKinds = ["code"] as const;

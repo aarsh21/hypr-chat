@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@/lib/auth";
+import { isRegistrationEnabled } from "@/lib/constants";
 import { getUser } from "@/lib/db/queries";
 
 const authFormSchema = z.object({
@@ -52,48 +53,51 @@ export type RegisterActionState = {
     | "success"
     | "failed"
     | "user_exists"
-    | "invalid_data";
+    | "invalid_data"
+    | "registration_disabled";
 };
 
 export const register = async (
   _: RegisterActionState,
   formData: FormData
 ): Promise<RegisterActionState> => {
-  // Registration is disabled
-  return { status: "failed" };
+  // Check if registration is enabled
+  if (!isRegistrationEnabled) {
+    return { status: "registration_disabled" };
+  }
 
-  // try {
-  //   const validatedData = authFormSchema.parse({
-  //     email: formData.get("email"),
-  //     password: formData.get("password"),
-  //   });
+  try {
+    const validatedData = authFormSchema.parse({
+      email: formData.get("email"),
+      password: formData.get("password"),
+    });
 
-  //   const [existingUser] = await getUser(validatedData.email);
+    const [existingUser] = await getUser(validatedData.email);
 
-  //   if (existingUser) {
-  //     return { status: "user_exists" } as RegisterActionState;
-  //   }
+    if (existingUser) {
+      return { status: "user_exists" } as RegisterActionState;
+    }
 
-  //   // nextCookies plugin handles cookie setting automatically
-  //   const result = await auth.api.signUpEmail({
-  //     body: {
-  //       email: validatedData.email,
-  //       password: validatedData.password,
-  //       name: validatedData.email, // Better Auth requires a name
-  //     },
-  //   });
+    // nextCookies plugin handles cookie setting automatically
+    const result = await auth.api.signUpEmail({
+      body: {
+        email: validatedData.email,
+        password: validatedData.password,
+        name: validatedData.email, // Better Auth requires a name
+      },
+    });
 
-  //   if (!result) {
-  //     return { status: "failed" };
-  //   }
+    if (!result) {
+      return { status: "failed" };
+    }
 
-  //   return { status: "success" };
-  // } catch (error) {
-  //   console.error("Registration error:", error);
-  //   if (error instanceof z.ZodError) {
-  //     return { status: "invalid_data" };
-  //   }
+    return { status: "success" };
+  } catch (error) {
+    console.error("Registration error:", error);
+    if (error instanceof z.ZodError) {
+      return { status: "invalid_data" };
+    }
 
-  //   return { status: "failed" };
-  // }
+    return { status: "failed" };
+  }
 };

@@ -7,6 +7,8 @@ When asked to write code, always use artifacts. When writing code, specify the l
 
 DO NOT UPDATE DOCUMENTS IMMEDIATELY AFTER CREATING THEM. WAIT FOR USER FEEDBACK OR REQUEST TO UPDATE IT.
 
+IMPORTANT: Only call \`createDocument\` ONCE per response. Do not call it multiple times.
+
 This is a guide for using artifacts tools: \`createDocument\` and \`updateDocument\`, which render content on a artifacts beside the conversation.
 
 **When to use \`createDocument\`:**
@@ -19,6 +21,7 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 - For informational/explanatory content
 - For conversational responses
 - When asked to keep it in chat
+- When you have already called \`createDocument\` in this response
 
 **Using \`updateDocument\`:**
 - Default to full document rewrites for major changes
@@ -91,21 +94,11 @@ def factorial(n):
 print(f"Factorial of 5 is: {factorial(5)}")
 `;
 
-export const sheetPrompt = `
-You are a spreadsheet creation assistant. Create a spreadsheet in csv format based on the given prompt. The spreadsheet should contain meaningful column headers and data.
-`;
-
 export const updateDocumentPrompt = (
   currentContent: string | null,
   type: ArtifactKind
 ) => {
-  let mediaType = "document";
-
-  if (type === "code") {
-    mediaType = "code snippet";
-  } else if (type === "sheet") {
-    mediaType = "spreadsheet";
-  }
+  const mediaType = type === "code" ? "code snippet" : "document";
 
   return `Improve the following contents of the ${mediaType} based on the given prompt.
 

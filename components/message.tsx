@@ -102,164 +102,187 @@ const PurePreviewMessage = ({
             </div>
           )}
 
-          {message.parts?.map((part, index) => {
-            const { type } = part;
-            const key = `message-${message.id}-part-${index}`;
+          {(() => {
+            // Track rendered document IDs to avoid duplicates
+            const renderedDocumentIds = new Set<string>();
 
-            if (type === "reasoning" && part.text?.trim().length > 0) {
-              return (
-                <MessageReasoning
-                  isLoading={isLoading}
-                  key={key}
-                  reasoning={part.text}
-                />
-              );
-            }
+            return message.parts?.map((part, index) => {
+              const { type } = part;
+              const key = `message-${message.id}-part-${index}`;
 
-            if (type === "text") {
-              if (mode === "view") {
+              if (type === "reasoning" && part.text?.trim().length > 0) {
                 return (
-                  <div key={key}>
-                    <MessageContent
-                      className={cn({
-                        "w-fit break-words rounded-2xl px-4 py-2.5 text-right text-primary-foreground bg-primary shadow-sm":
-                          message.role === "user",
-                        "bg-transparent px-0 py-0 text-left":
-                          message.role === "assistant",
-                      })}
-                      data-testid="message-content"
-                    >
-                      <Response>{sanitizeText(part.text)}</Response>
-                    </MessageContent>
-                  </div>
-                );
-              }
-
-              if (mode === "edit") {
-                return (
-                  <div
-                    className="flex w-full flex-row items-start gap-3"
+                  <MessageReasoning
+                    isLoading={isLoading}
                     key={key}
-                  >
-                    <div className="size-8" />
-                    <div className="min-w-0 flex-1">
-                      <MessageEditor
-                        key={message.id}
-                        message={message}
-                        regenerate={regenerate}
-                        setMessages={setMessages}
-                        setMode={setMode}
-                      />
+                    reasoning={part.text}
+                  />
+                );
+              }
+
+              if (type === "text") {
+                if (mode === "view") {
+                  return (
+                    <div key={key}>
+                      <MessageContent
+                        className={cn({
+                          "w-fit break-words rounded-2xl px-4 py-2.5 text-right text-primary-foreground bg-primary shadow-sm":
+                            message.role === "user",
+                          "bg-transparent px-0 py-0 text-left":
+                            message.role === "assistant",
+                        })}
+                        data-testid="message-content"
+                      >
+                        <Response>{sanitizeText(part.text)}</Response>
+                      </MessageContent>
                     </div>
-                  </div>
-                );
+                  );
+                }
+
+                if (mode === "edit") {
+                  return (
+                    <div
+                      className="flex w-full flex-row items-start gap-3"
+                      key={key}
+                    >
+                      <div className="size-8" />
+                      <div className="min-w-0 flex-1">
+                        <MessageEditor
+                          key={message.id}
+                          message={message}
+                          regenerate={regenerate}
+                          setMessages={setMessages}
+                          setMode={setMode}
+                        />
+                      </div>
+                    </div>
+                  );
+                }
               }
-            }
 
-            if (type === "tool-getWeather") {
-              const { toolCallId, state } = part;
+              if (type === "tool-getWeather") {
+                const { toolCallId, state } = part;
 
-              return (
-                <Tool defaultOpen={true} key={toolCallId}>
-                  <ToolHeader state={state} type="tool-getWeather" />
-                  <ToolContent>
-                    {state === "input-available" && (
-                      <ToolInput input={part.input} />
-                    )}
-                    {state === "output-available" && (
-                      <ToolOutput
-                        errorText={undefined}
-                        output={<Weather weatherAtLocation={part.output} />}
-                      />
-                    )}
-                  </ToolContent>
-                </Tool>
-              );
-            }
-
-            if (type === "tool-createDocument") {
-              const { toolCallId } = part;
-
-              if (part.output && "error" in part.output) {
                 return (
-                  <div
-                    className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-                    key={toolCallId}
-                  >
-                    Error creating document: {String(part.output.error)}
-                  </div>
+                  <Tool defaultOpen={true} key={toolCallId}>
+                    <ToolHeader state={state} type="tool-getWeather" />
+                    <ToolContent>
+                      {state === "input-available" && (
+                        <ToolInput input={part.input} />
+                      )}
+                      {state === "output-available" && (
+                        <ToolOutput
+                          errorText={undefined}
+                          output={<Weather weatherAtLocation={part.output} />}
+                        />
+                      )}
+                    </ToolContent>
+                  </Tool>
                 );
               }
 
-              return (
-                <DocumentPreview
-                  isReadonly={isReadonly}
-                  key={toolCallId}
-                  result={part.output}
-                />
-              );
-            }
+              if (type === "tool-createDocument") {
+                const { toolCallId } = part;
+                const documentId = part.output?.id;
 
-            if (type === "tool-updateDocument") {
-              const { toolCallId } = part;
+                // Skip if we've already rendered this document
+                if (documentId && renderedDocumentIds.has(documentId)) {
+                  return null;
+                }
+                if (documentId) {
+                  renderedDocumentIds.add(documentId);
+                }
 
-              if (part.output && "error" in part.output) {
+                if (part.output && "error" in part.output) {
+                  return (
+                    <div
+                      className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
+                      key={toolCallId}
+                    >
+                      Error creating document: {String(part.output.error)}
+                    </div>
+                  );
+                }
+
                 return (
-                  <div
-                    className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-                    key={toolCallId}
-                  >
-                    Error updating document: {String(part.output.error)}
-                  </div>
-                );
-              }
-
-              return (
-                <div className="relative" key={toolCallId}>
                   <DocumentPreview
-                    args={{ ...part.output, isUpdate: true }}
                     isReadonly={isReadonly}
+                    key={toolCallId}
                     result={part.output}
                   />
-                </div>
-              );
-            }
+                );
+              }
 
-            if (type === "tool-requestSuggestions") {
-              const { toolCallId, state } = part;
+              if (type === "tool-updateDocument") {
+                const { toolCallId } = part;
+                const documentId = part.output?.id;
 
-              return (
-                <Tool defaultOpen={true} key={toolCallId}>
-                  <ToolHeader state={state} type="tool-requestSuggestions" />
-                  <ToolContent>
-                    {state === "input-available" && (
-                      <ToolInput input={part.input} />
-                    )}
-                    {state === "output-available" && (
-                      <ToolOutput
-                        errorText={undefined}
-                        output={
-                          "error" in part.output ? (
-                            <div className="rounded border p-2 text-red-500">
-                              Error: {String(part.output.error)}
-                            </div>
-                          ) : (
-                            <DocumentToolResult
-                              isReadonly={isReadonly}
-                              result={part.output}
-                              type="request-suggestions"
-                            />
-                          )
-                        }
-                      />
-                    )}
-                  </ToolContent>
-                </Tool>
-              );
-            }
+                // Skip if we've already rendered this document
+                if (documentId && renderedDocumentIds.has(documentId)) {
+                  return null;
+                }
+                if (documentId) {
+                  renderedDocumentIds.add(documentId);
+                }
 
-            return null;
-          })}
+                if (part.output && "error" in part.output) {
+                  return (
+                    <div
+                      className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
+                      key={toolCallId}
+                    >
+                      Error updating document: {String(part.output.error)}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="relative" key={toolCallId}>
+                    <DocumentPreview
+                      args={{ ...part.output, isUpdate: true }}
+                      isReadonly={isReadonly}
+                      result={part.output}
+                    />
+                  </div>
+                );
+              }
+
+              if (type === "tool-requestSuggestions") {
+                const { toolCallId, state } = part;
+
+                return (
+                  <Tool defaultOpen={true} key={toolCallId}>
+                    <ToolHeader state={state} type="tool-requestSuggestions" />
+                    <ToolContent>
+                      {state === "input-available" && (
+                        <ToolInput input={part.input} />
+                      )}
+                      {state === "output-available" && (
+                        <ToolOutput
+                          errorText={undefined}
+                          output={
+                            "error" in part.output ? (
+                              <div className="rounded border p-2 text-red-500">
+                                Error: {String(part.output.error)}
+                              </div>
+                            ) : (
+                              <DocumentToolResult
+                                isReadonly={isReadonly}
+                                result={part.output}
+                                type="request-suggestions"
+                              />
+                            )
+                          }
+                        />
+                      )}
+                    </ToolContent>
+                  </Tool>
+                );
+              }
+
+              return null;
+            });
+          })()}
 
           {!isReadonly && (
             <MessageActions
