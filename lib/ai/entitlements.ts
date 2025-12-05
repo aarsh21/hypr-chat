@@ -6,6 +6,6 @@ type Entitlements = {
 };
 
 export const entitlements: Entitlements = {
-  maxMessagesPerDay: 5,
+  maxMessagesPerDay: 20,
   availableChatModelIds: ["chat-model", "chat-model-reasoning"],
 };
