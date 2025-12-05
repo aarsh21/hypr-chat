@@ -30,6 +30,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow access to chat pages without auth (page will handle visibility check)
+  // This enables public chat sharing
+  if (pathname.startsWith("/chat/")) {
+    return NextResponse.next();
+  }
+
+  // Allow access to document API without auth (API will handle visibility check)
+  // This enables viewing documents in public chats
+  if (pathname.startsWith("/api/document")) {
+    return NextResponse.next();
+  }
+
   const session = await auth.api.getSession({
     headers: request.headers,
   });

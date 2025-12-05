@@ -12,12 +12,14 @@ import { LoaderIcon } from "./icons";
 import { Button } from "./ui/button";
 
 type VersionFooterProps = {
+  chatId: string;
   handleVersionChange: (type: "next" | "prev" | "toggle" | "latest") => void;
   documents: Document[] | undefined;
   currentVersionIndex: number;
 };
 
 export const VersionFooter = ({
+  chatId,
   handleVersionChange,
   documents,
   currentVersionIndex,
@@ -56,7 +58,7 @@ export const VersionFooter = ({
             setIsMutating(true);
 
             mutate(
-              `/api/document?id=${artifact.documentId}`,
+              `/api/document?id=${artifact.documentId}&chatId=${chatId}`,
               await fetch(
                 `/api/document?id=${artifact.documentId}&timestamp=${getDocumentTimestampByIndex(
                   documents,

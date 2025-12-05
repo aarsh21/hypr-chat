@@ -29,19 +29,18 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
     headers: await headers(),
   });
 
-  if (!session) {
-    redirect("/login");
-  }
-
+  // For private chats, require authentication and ownership
   if (chat.visibility === "private") {
-    if (!session.user) {
-      return notFound();
+    if (!session?.user) {
+      redirect("/login");
     }
 
     if (session.user.id !== chat.userId) {
       return notFound();
     }
   }
+
+  // For public chats, allow unauthenticated access
 
   const messagesFromDb = await getMessagesByChatId({
     id,

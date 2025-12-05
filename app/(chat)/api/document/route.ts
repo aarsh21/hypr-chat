@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import type { ArtifactKind } from "@/components/artifact";
 import {
   deleteDocumentsByIdAfterTimestamp,
+  getChatById,
   getDocumentsById,
   saveDocument,
 } from "@/lib/db/queries";
@@ -10,6 +11,7 @@ import { ChatSDKError } from "@/lib/errors";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  const chatId = searchParams.get("chatId");
 
   if (!id) {
     return new ChatSDKError(
@@ -22,10 +24,6 @@ export async function GET(request: Request) {
     headers: request.headers,
   });
 
-  if (!session?.user) {
-    return new ChatSDKError("unauthorized:document").toResponse();
-  }
-
   const documents = await getDocumentsById({ id });
 
   const [document] = documents;
@@ -34,8 +32,25 @@ export async function GET(request: Request) {
     return new ChatSDKError("not_found:document").toResponse();
   }
 
-  if (document.userId !== session.user.id) {
-    return new ChatSDKError("forbidden:document").toResponse();
+  // Check if user is the owner
+  const isOwner = session?.user?.id === document.userId;
+
+  // If not owner, check if accessing via a public chat
+  if (!isOwner) {
+    if (!chatId) {
+      return new ChatSDKError("forbidden:document").toResponse();
+    }
+
+    const chat = await getChatById({ id: chatId });
+
+    // Allow access if chat is public and document belongs to chat owner
+    if (
+      !chat ||
+      chat.visibility !== "public" ||
+      chat.userId !== document.userId
+    ) {
+      return new ChatSDKError("forbidden:document").toResponse();
+    }
   }
 
   return Response.json(documents, { status: 200 });
