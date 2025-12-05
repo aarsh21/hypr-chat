@@ -9,6 +9,7 @@
         "@ai-sdk/openai-compatible": "^1.0.28",
         "@ai-sdk/provider": "2.0.0",
         "@ai-sdk/react": "2.0.26",
+        "@catppuccin/codemirror": "^1.0.1",
         "@codemirror/lang-javascript": "^6.2.4",
         "@codemirror/lang-python": "^6.2.1",
         "@codemirror/state": "^6.5.2",
@@ -146,6 +147,10 @@
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.2.2", "", { "os": "win32", "cpu": "x64" }, "sha512-DAuHhHekGfiGb6lCcsT4UyxQmVwQiBCBUMwVra/dcOSs9q8OhfaZgey51MlekT3p8UwRqtXQfFuEJBhJNdLZwg=="],
 
     "@braintree/sanitize-url": ["@braintree/sanitize-url@7.1.1", "", {}, "sha512-i1L7noDNxtFyL5DmZafWy1wRVhGehQmzZaz1HiN5e7iylJMSZR7ekOV7NsIqa5qBldlLrsKv4HbgFUVlQrz8Mw=="],
+
+    "@catppuccin/codemirror": ["@catppuccin/codemirror@1.0.1", "", { "dependencies": { "@catppuccin/palette": "^1.7.1", "@codemirror/language": "^6.0.0", "@codemirror/state": "^6.0.0", "@codemirror/view": "^6.0.0", "@lezer/highlight": "^1.0.0" } }, "sha512-qGHeTGu+sAvMclNl1YnkIxXkqrI3P9GXS0jWsgq68ITFDb5bz/5Xu4NIRYYwv1huNGaKLEBczhMHrLv7Vzb4Yg=="],
+
+    "@catppuccin/palette": ["@catppuccin/palette@1.7.1", "", {}, "sha512-aRc1tbzrevOTV7nFTT9SRdF26w/MIwT4Jwt4fDMc9itRZUDXCuEDBLyz4TQMlqO9ZP8mf5Hu4Jr6D03NLFc6Gw=="],
 
     "@chevrotain/cst-dts-gen": ["@chevrotain/cst-dts-gen@11.0.3", "", { "dependencies": { "@chevrotain/gast": "11.0.3", "@chevrotain/types": "11.0.3", "lodash-es": "4.17.21" } }, "sha512-BvIKpRLeS/8UbfxXxgC33xOumsacaeCKAjAeLyOn7Pcp95HiRbrpl14S+9vaZLolnbssPIUuiUd8IvgkRyt6NQ=="],
 
