@@ -133,6 +133,29 @@ export const codeArtifact = new Artifact<"code", Metadata>({
         }));
 
         try {
+          // Wait for Pyodide script to load if not already available
+          // @ts-expect-error - loadPyodide is not defined in globalThis types
+          if (typeof globalThis.loadPyodide !== "function") {
+            await new Promise<void>((resolve, reject) => {
+              const timeout = setTimeout(() => {
+                reject(
+                  new Error("Pyodide failed to load. Please refresh the page.")
+                );
+              }, 10000);
+
+              const checkPyodide = () => {
+                // @ts-expect-error - loadPyodide is not defined in globalThis types
+                if (typeof globalThis.loadPyodide === "function") {
+                  clearTimeout(timeout);
+                  resolve();
+                } else {
+                  setTimeout(checkPyodide, 100);
+                }
+              };
+              checkPyodide();
+            });
+          }
+
           // @ts-expect-error - loadPyodide is not defined
           const currentPyodideInstance = await globalThis.loadPyodide({
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
