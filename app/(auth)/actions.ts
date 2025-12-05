@@ -59,38 +59,41 @@ export const register = async (
   _: RegisterActionState,
   formData: FormData
 ): Promise<RegisterActionState> => {
-  try {
-    const validatedData = authFormSchema.parse({
-      email: formData.get("email"),
-      password: formData.get("password"),
-    });
+  // Registration is disabled
+  return { status: "failed" };
 
-    const [existingUser] = await getUser(validatedData.email);
+  // try {
+  //   const validatedData = authFormSchema.parse({
+  //     email: formData.get("email"),
+  //     password: formData.get("password"),
+  //   });
 
-    if (existingUser) {
-      return { status: "user_exists" } as RegisterActionState;
-    }
+  //   const [existingUser] = await getUser(validatedData.email);
 
-    // nextCookies plugin handles cookie setting automatically
-    const result = await auth.api.signUpEmail({
-      body: {
-        email: validatedData.email,
-        password: validatedData.password,
-        name: validatedData.email, // Better Auth requires a name
-      },
-    });
+  //   if (existingUser) {
+  //     return { status: "user_exists" } as RegisterActionState;
+  //   }
 
-    if (!result) {
-      return { status: "failed" };
-    }
+  //   // nextCookies plugin handles cookie setting automatically
+  //   const result = await auth.api.signUpEmail({
+  //     body: {
+  //       email: validatedData.email,
+  //       password: validatedData.password,
+  //       name: validatedData.email, // Better Auth requires a name
+  //     },
+  //   });
 
-    return { status: "success" };
-  } catch (error) {
-    console.error("Registration error:", error);
-    if (error instanceof z.ZodError) {
-      return { status: "invalid_data" };
-    }
+  //   if (!result) {
+  //     return { status: "failed" };
+  //   }
 
-    return { status: "failed" };
-  }
+  //   return { status: "success" };
+  // } catch (error) {
+  //   console.error("Registration error:", error);
+  //   if (error instanceof z.ZodError) {
+  //     return { status: "invalid_data" };
+  //   }
+
+  //   return { status: "failed" };
+  // }
 };
