@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1
 
-FROM oven/bun:1-alpine AS base
+FROM node:20-alpine AS base
+
+# Install bun for fast package management
+RUN npm install -g bun
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -9,7 +12,7 @@ WORKDIR /app
 # Copy package files
 COPY package.json bun.lock ./
 
-# Install dependencies
+# Install dependencies using bun (fast)
 RUN bun install --frozen-lockfile
 
 # Rebuild the source code only when needed
@@ -23,11 +26,11 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build Next.js using bun
-RUN bun run --bun next build
+# Build Next.js only (skip migrations - they run at container startup)
+RUN npx next build
 
 # Production image, copy all the files and run next
-FROM oven/bun:1-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -64,4 +67,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["bun", "run", "server.js"]
+CMD ["node", "server.js"]

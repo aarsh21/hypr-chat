@@ -2,7 +2,7 @@
 set -e
 
 echo "Running database migrations..."
-bun run lib/db/migrate.ts
+npx tsx lib/db/migrate.ts
 
 echo "Starting application..."
 exec "$@"
