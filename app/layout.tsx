@@ -7,8 +7,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3000"),
-  title: "AI Chatbot",
-  description: "AI chatbot powered by GLM.",
+  title: "Hypr Chat",
+  description: "The premium AI chat experience.",
 };
 
 export const viewport = {
