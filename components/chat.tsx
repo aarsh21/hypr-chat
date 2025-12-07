@@ -181,7 +181,7 @@ export function Chat({
           votes={votes}
         />
 
-        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background/80 backdrop-blur-xl px-2 pb-3 md:px-4 md:pb-4 transition-all duration-200 ease-in-out">
+        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background/80 px-2 pb-3 backdrop-blur-xl transition-all duration-200 ease-in-out md:px-4 md:pb-4">
           {!isReadonly && (
             <MultimodalInput
               attachments={attachments}

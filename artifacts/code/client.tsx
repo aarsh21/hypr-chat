@@ -141,7 +141,7 @@ export const codeArtifact = new Artifact<"code", Metadata>({
                 reject(
                   new Error("Pyodide failed to load. Please refresh the page.")
                 );
-              }, 10000);
+              }, 10_000);
 
               const checkPyodide = () => {
                 // @ts-expect-error - loadPyodide is not defined in globalThis types

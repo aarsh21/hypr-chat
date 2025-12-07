@@ -16,8 +16,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { signOut, useSession } from "@/lib/auth-client";
 import type { User } from "@/lib/auth";
+import { signOut, useSession } from "@/lib/auth-client";
 import { LoaderIcon } from "./icons";
 import { toast } from "./toast";
 
@@ -49,7 +49,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                 data-testid="user-nav-button"
               >
                 <div className="flex size-6 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
-                  <span className="text-xs font-medium">
+                  <span className="font-medium text-xs">
                     {(user.email ?? "U")[0].toUpperCase()}
                   </span>
                 </div>
